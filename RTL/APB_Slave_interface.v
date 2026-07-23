@@ -26,7 +26,7 @@ module APB_Slave_Interface(PCLK,PRESETn,PSEL,PENABLE,PREADY,PWRITE,
 	assign sys_rst = PRESETn;
 	assign gpio_we = (PS==ENABLE)? PWRITE : 1'b0;
 
-	assign gpio_addr = (PS==ENABLE)? PADDR : 32'd0;
+	assign gpio_addr = PADDR;
 	assign gpio_dat_i = (PS==ENABLE)? PWDATA : 32'd0;
 
 	assign PREADY = (PS==ENABLE)? 1'b1 : 1'b0;
