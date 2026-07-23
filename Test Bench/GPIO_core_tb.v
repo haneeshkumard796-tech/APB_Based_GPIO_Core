@@ -69,11 +69,11 @@ module top;
 			io_pad_info = data;
 		@(negedge PCLK);
 		PENABLE = 1'b0;
-		@(negedge PCLK);
-		PENABLE = 1'b1;
 		PWRITE = 1'b1;
 		PWDATA = data;
 		PADDR = addr;
+		@(negedge PCLK);
+		PENABLE = 1'b1;
 		wait(PREADY); //In Enable Phase
 		wait(!PREADY); //In Setup Phase
 		PENABLE = 1'b0;
@@ -85,10 +85,10 @@ module top;
 	task read_GPIO(input [31:0]addr); begin	
 		@(negedge PCLK);
 		PENABLE = 1'b0;
-		@(negedge PCLK);
-		PENABLE = 1'b1;
 		PWRITE = 1'b0;
 		PADDR = addr;
+		@(negedge PCLK);
+		PENABLE = 1'b1;
 		wait(PREADY); //In Enable Phase
 		wait(!PREADY); //In Setup Phase
 		PENABLE = 1'b0;
@@ -187,18 +187,26 @@ module top;
 		config_reg(32'h0000_0000, `RGPIO_OE); //Enabling all pins as input
 		//drive the io pad
 		io_pad_drv = 32'h000f_0fff;
-	       	@(negedge PCLK);
+	       	#(CYCLE*2);
 		io_pad_drv = 32'hb570_0c80;
+		//Waiting for Interrupt request
+		wait(IRQ);
 		//read the GPIO_IN
 		read_GPIO(`RGPIO_IN);
 		//read the GPIO_INTS
 		read_GPIO(`RGPIO_INTS);
 		//Inform the GPIO core of Interrupt pending
-		config_reg(32'h3,`RGPIO_CTRL);
+		config_reg(32'h2,`RGPIO_CTRL);
 		//Clear the Interrupts
 		config_reg(32'h0,`RGPIO_INTS);
+		//waiting for no IRQ
+		wait(IRQ == 1'b0);
 		//Inform the GPIO core of no pending interrupts
 		config_reg(32'h1,`RGPIO_CTRL);
+		//Disabling INTE
+		config_reg(32'h0,`RGPIO_INTE);
+		//Disabling PTRIG
+		config_reg(32'h0,`RGPIO_PTRIG);
 		//desel core
 		desel_core();
 	end
@@ -225,11 +233,21 @@ module top;
 		//read the GPIO_INTS
 		read_GPIO(`RGPIO_INTS);
 		//Inform the GPIO core of Interrupt pending
-		config_reg(32'h3,`RGPIO_CTRL);
+		config_reg(32'h2,`RGPIO_CTRL);
 		//Clear the Interrupts
 		config_reg(32'h0,`RGPIO_INTS);
+		//Waiting for no IRQ
+		wait(IRQ == 1'b0);
 		//Inform the GPIO core of no pending interrupts
 		config_reg(32'h1,`RGPIO_CTRL);
+		//Disabling INTE
+		config_reg(32'h0, `RGPIO_INTE);
+		//Disabling PTRIG
+		config_reg(32'h0, `RGPIO_PTRIG);
+		//Disabling ECLK
+		config_reg(32'h0, `RGPIO_ECLK);
+		//Disabling NEC
+		config_reg(32'h0, `RGPIO_NEC);
 		//desel core
 		desel_core();
 	end
