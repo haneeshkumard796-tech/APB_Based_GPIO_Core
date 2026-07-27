@@ -12,7 +12,7 @@ module GPIO_core(PCLK,PRESETn,PWRITE,PADDR,PWDATA,PSEL,PENABLE,aux_in,
 
 	APB_Slave_Interface apb_slave_interface(PCLK,PRESETn,PSEL,PENABLE,PREADY,PWRITE,PADDR,PWDATA,PRDATA,IRQ,sys_clk,sys_rst,gpio_we,gpio_addr,gpio_dat_i,gpio_dat_o,gpio_inta_o);
 
-	GPIO_registers gpio_registers(sys_clk,sys_rst,gpio_we,gpio_addr,gpio_dat_i,gpio_dat_o,gpio_inta_o,aux_in,out_pad_o,oen_padoe_o,in_pad_i,gpio_eclk);
+	GPIO_registers gpio_registers(sys_clk,sys_rst,gpio_we,gpio_addr,gpio_dat_i,gpio_dat_o,gpio_inta_o,aux_i,out_pad_o,oen_padoe_o,in_pad_i,gpio_eclk);
 
 	Auxiliary_interface auxiliary_interface(sys_clk,sys_rst,aux_in,aux_i);
 
