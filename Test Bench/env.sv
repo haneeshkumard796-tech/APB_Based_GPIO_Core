@@ -52,16 +52,13 @@ class env extends uvm_env;
     function void connect_phase(uvm_phase phase);
         super.connect_phase(phase);
         // Connect monitor analysis ports to scoreboard analysis fifo exports
-        foreach(apb_ag[i]) begin
-		apb_ag[i].mon.ap.connect(sb.apb_fifo.analysis_export);
-	end 
-        
-	foreach(aux_ag[i]) begin
-		aux_ag[i].mon.ap.connect(sb.aux_fifo.analysis_export);
-       	end 
-        
-	foreach(io_pad_ag[i]) begin
-		io_pad_ag[i].mon.ap.connect(sb.io_pad_fifo.analysis_export);
-	end
+	for(int i=0;i<e_cfg.no_of_APB_agents;i++)
+		apb_ag[i].mon.ap.connect(sb.apb_fifo[i].analysis_export);
+	
+	for(int i=0;i<e_cfg.no_of_AUX_agents;i++)
+		aux_ag[i].mon.ap.connect(sb.aux_fifo[i].analysis_export);
+	
+	for(int i=0;i<e_cfg.no_of_IO_agents;i++)
+		io_pad_ag[i].mon.ap.connect(sb.io_pad_fifo[i].analysis_export);
     endfunction
 endclass
