@@ -5,7 +5,7 @@ class IO_pad_txn extends uvm_sequence_item;
     endfunction
 
     rand logic [31:0] io_pad;
-    rand logic io_pad_ctrl;
+    rand logic [1:0]io_pad_ctrl;
    
     extern function void do_print(uvm_printer printer);
     extern function void do_copy(uvm_object rhs);
@@ -23,15 +23,16 @@ endclass
 	this.io_pad = rhs_.io_pad;
 	this.io_pad_ctrl = rhs_.io_pad_ctrl;
     endfunction
-    function bit IO_pad_txn::do_compare(uvm_object rhs, uvm_comparer comparer); 
+    function bit IO_pad_txn::do_compare(uvm_object rhs, uvm_comparer comparer); 	
     	IO_pad_txn rhs_;	
 	if(!$cast(rhs_,rhs))
 		`uvm_fatal(get_type_name(),"Casting Failed")
 	return (this.io_pad == rhs_.io_pad && this.io_pad_ctrl == rhs_.io_pad_ctrl);
     endfunction
     function void IO_pad_txn::post_randomize();
-    	io_pad[31:28] = io_pad_ctrl? io_pad[31:28] : 4'hz;
-    	io_pad[23:20] = io_pad_ctrl? io_pad[23:20] : 4'hz;
-    	io_pad[15:12] = io_pad_ctrl? io_pad[15:12] : 4'hz;
-    	io_pad[7:4] = io_pad_ctrl? io_pad[7:4] : 4'hz;
+	io_pad = io_pad_ctrl == 2'b00 ? 32'hz : io_pad;
+    	io_pad[31:28] = io_pad_ctrl == 2'b10 | io_pad_ctrl == 2'b01 ? io_pad[31:28] : 4'hz;
+    	io_pad[23:20] = io_pad_ctrl == 2'b10 | io_pad_ctrl == 2'b01 ? io_pad[23:20] : 4'hz;
+    	io_pad[15:12] = io_pad_ctrl == 2'b10 | io_pad_ctrl == 2'b01 ? io_pad[15:12] : 4'hz;
+    	io_pad[7:4] = io_pad_ctrl == 2'b10 | io_pad_ctrl == 2'b01 ? io_pad[7:4] : 4'hz;	
     endfunction
