@@ -36,11 +36,14 @@ endtask
 
 task IO_pad_mon::collect_data();
 	@(io_intrf.MON_CB);
-	for(int i=0;i<=31;i++)
+	/*for(int i=0;i<=31;i++)
 		if(io_intrf.MON_CB.io_pad[i] != 1'hz) begin
 			if(txn.io_pad != io_intrf.MON_CB.io_pad) begin	
 				txn.io_pad = io_intrf.MON_CB.io_pad;
 				break;
 			end
-		end
+		end*/
+	txn.io_pad = io_intrf.MON_CB.io_pad;
+	`uvm_info(get_type_name(),$sformatf("The txn data colledted is %s",txn.sprint()),UVM_MEDIUM)
+	@(io_intrf.MON_CB);
 endtask
