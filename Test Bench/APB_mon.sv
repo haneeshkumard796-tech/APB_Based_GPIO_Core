@@ -31,20 +31,42 @@ task APB_mon::run_phase(uvm_phase phase);
 	txn = APB_txn::type_id::create("txn");	
 	forever begin
 		collect_data();
-		`uvm_info(get_type_name(),$sformatf("The txn data collected is %s",txn.sprint()), UVM_LOW)	
+		`uvm_info(get_type_name(),$sformatf("The txn data collected is %s",txn.sprint()), UVM_MEDIUM)	
 		ap.write(txn);
 	end
 endtask
 
 task APB_mon::collect_data();
-	repeat(10) begin
 	@(apb_intrf.MON_CB);
-	wait(apb_intrf.MON_CB.PREADY == 1'b1 && apb_intrf.MON_CB.PWRITE == 1'b0);
-	`uvm_info(get_type_name(),"PREADY and PWRITE are 1 & 0",UVM_MEDIUM)
+	wait(apb_intrf.MON_CB.PREADY == 1'b1 | apb_intrf.MON_CB.PRESETn == 1'b0);
+//	`uvm_info(get_type_name(),"PREADY and PWRITE are 1 & 0",UVM_MEDIUM)
+	txn.PRESETn = apb_intrf.MON_CB.PRESETn;
 	txn.PWRITE = apb_intrf.MON_CB.PWRITE;
 	txn.PADDR = apb_intrf.MON_CB.PADDR;
+	txn.PREADY = apb_intrf.MON_CB.PREADY;
+	txn.PSEL = apb_intrf.MON_CB.PSEL;
+	txn.PENABLE = apb_intrf.MON_CB.PENABLE;
+	txn.IRQ = apb_intrf.MON_CB.IRQ;
+	txn.PWDATA = apb_intrf.MON_CB.PWDATA;
+	txn.PRDATA = apb_intrf.MON_CB.PRDATA;
+	if(txn.PWRITE == 1'b1)
 	case(txn.PADDR)
-		32'h0 : 	txn.RGPIO_IN = apb_intrf.MON_CB.PRDATA;
+		32'h4 : 	txn.RGPIO_OUT = apb_intrf.MON_CB.PWDATA;
+	 	32'h8 :  	txn.RGPIO_OE = apb_intrf.MON_CB.PWDATA;
+		32'hc : 	txn.RGPIO_INTE = apb_intrf.MON_CB.PWDATA;
+		32'h10 : 	txn.RGPIO_PTRIG = apb_intrf.MON_CB.PWDATA;
+		32'h14 :  	txn.RGPIO_AUX = apb_intrf.MON_CB.PWDATA;
+		32'h18 :	begin
+				txn.RGPIO_CTRL_GIE = apb_intrf.MON_CB.PWDATA[0];
+				txn.RGPIO_CTRL_IP = apb_intrf.MON_CB.PWDATA[1];
+				end
+		32'h1c :  	txn.RGPIO_INTS = apb_intrf.MON_CB.PWDATA;
+		32'h20 :  	txn.RGPIO_ECLK = apb_intrf.MON_CB.PWDATA;
+		32'h24 : 	txn.RGPIO_NEC = apb_intrf.MON_CB.PWDATA;	
+	endcase
+	else if (txn.PWRITE == 1'b0)
+	case(txn.PADDR)
+		32'h0 :		txn.RGPIO_IN = apb_intrf.MON_CB.PRDATA;
 		32'h4 : 	txn.RGPIO_OUT = apb_intrf.MON_CB.PRDATA;
 	 	32'h8 :  	txn.RGPIO_OE = apb_intrf.MON_CB.PRDATA;
 		32'hc : 	txn.RGPIO_INTE = apb_intrf.MON_CB.PRDATA;
@@ -58,6 +80,6 @@ task APB_mon::collect_data();
 		32'h20 :  	txn.RGPIO_ECLK = apb_intrf.MON_CB.PRDATA;
 		32'h24 : 	txn.RGPIO_NEC = apb_intrf.MON_CB.PRDATA;	
 	endcase
-	@(apb_intrf.MON_CB);
-	end
+
+	@(apb_intrf.MON_CB);	
 endtask
