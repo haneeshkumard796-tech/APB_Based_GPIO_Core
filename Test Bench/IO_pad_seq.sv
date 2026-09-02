@@ -24,7 +24,7 @@ task IO_input_interrupt_seq::body();
 
 	repeat(2) begin	
 	start_item(req);
-		req.randomize() with {io_pad_ctrl==0;};
+		req.randomize() with {io_pad_ctrl==2'b10;};
 	finish_item(req);	
 	end
 endtask
@@ -43,7 +43,7 @@ task IO_input_seq::body();
 	req = IO_pad_txn::type_id::create("req");
 	
 	start_item(req);
-		req.randomize() with {io_pad_ctrl==0;};
+		req.randomize() with {io_pad_ctrl==2'b01;};
 	finish_item(req);	
 endtask
 
@@ -61,7 +61,7 @@ task IO_output_seq::body();
 	req = IO_pad_txn::type_id::create("req");
 	
 	start_item(req);
-		req.randomize() with {io_pad == 32'hz; io_pad_ctrl==1;};
+		req.randomize() with {io_pad_ctrl==2'b0;};
 	finish_item(req);	
 endtask
 
@@ -79,7 +79,7 @@ task IO_bidir_seq::body();
 	req = IO_pad_txn::type_id::create("req");
 	
 	start_item(req);
-		req.randomize() with {io_pad_ctrl==1;};
+		req.randomize() with {io_pad_ctrl==2'b11;};
 	finish_item(req);	
 endtask
 
@@ -97,6 +97,6 @@ task IO_reset_seq::body();
 	req = IO_pad_txn::type_id::create("req");
 	
 	start_item(req);
-		req.randomize() with {io_pad == 32'hz;};
+		req.randomize() with {io_pad_ctrl == 2'b0;};
 	finish_item(req);	
 endtask
